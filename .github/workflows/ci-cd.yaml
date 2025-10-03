@@ -76,64 +76,55 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test-and-lint, docker-build]
-    if: success() && github.ref == 'refs/heads/main'
+    needs: [ test-and-lint, docker-build ]
+    if: github.ref == 'refs/heads/master'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup SSH with passphrase
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
-        chmod 600 ~/.ssh/deploy_key
-        eval "$(ssh-agent -s)"
-        echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/deploy_key
-        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: 22
+          timeout: 60s
+          script: |
+            set -e
+            echo "🚀 Starting deployment..."
+            cd /opt/medical-lab-app
 
-    - name: Deploy to server
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: 22
-        timeout: 60s
-        script: |
-          set -e
-          echo "🚀 Starting deployment..."
-          cd /opt/medical-lab-app
-          
-          # Останавливаем текущие контейнеры
-          docker compose down
-          
-          # Pull последних изменений
-          git pull origin main
-          
-          # Создаем/обновляем .env файл
-          cat > .env << EOL
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
-          DEBUG=False
-          ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }}
-          DB_NAME=medical_lab_db
-          DB_USER=medical_lab_user
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_HOST=db
-          DB_PORT=5432
-          EOL
-          
-          # Перезапускаем контейнеры
-          docker compose up -d --build
-          
-          # Ждем готовности базы данных
-          sleep 15
-          
-          # Выполняем миграции
-          docker compose exec -T web python manage.py migrate --noinput
-          
-          # Собираем статические файлы
-          docker compose exec -T web python manage.py collectstatic --noinput
-          
-          echo "✅ Deployment completed successfully!"
+            # Останавливаем текущие контейнеры
+            docker compose down
+
+            # Pull последних изменений
+            git pull origin master
+
+            # Создаем/обновляем .env файл
+            cat > .env << EOL
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            DEBUG=False
+            ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }}
+            DB_NAME=medical_lab_db
+            DB_USER=medical_lab_user
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=db
+            DB_PORT=5432
+            EOL
+
+            # Перезапускаем контейнеры
+            docker compose up -d --build
+
+            # Ждем готовности базы данных
+            sleep 15
+
+            # Выполняем миграции
+            docker compose exec -T web python manage.py migrate --noinput
+
+            # Собираем статические файлы
+            docker compose exec -T web python manage.py collectstatic --noinput
+
+            echo "✅ Deployment completed successfully!"
