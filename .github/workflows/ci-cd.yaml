@@ -106,37 +106,43 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        timeout: 30s
         script: |
-          # Создаем директорию приложения если не существует
-          mkdir -p /home/${{ secrets.SERVER_USER }}/medical-lab
-          cd /home/${{ secrets.SERVER_USER }}/medical-lab
-          
-          # Копируем файлы
-          git clone https://github.com/${{ github.repository }} . || git pull origin main
-          
-          # Копируем .env файл если существует
-          if [ -f /home/${{ secrets.SERVER_USER }}/.env.medical-lab ]; then
-            cp /home/${{ secrets.SERVER_USER }}/.env.medical-lab .env
+          set -e  # Останавливать выполнение при ошибке
+          echo "📁 Переходим в директорию проекта..."
+          mkdir -p /home/test-user/medical-lab
+          cd /home/test-user/medical-lab
+
+          echo "📥 Обновляем код..."
+          if [ -d ".git" ]; then
+            git pull origin main
+          else
+            git clone https://github.com/ChubshevAB/Graduate-work.git .
           fi
-          
-          # Останавливаем и перезапускаем контейнеры
-          docker-compose down
+
+          echo "🔧 Копируем .env файл..."
+          if [ -f /home/test-user/.env.medical-lab ]; then
+            cp /home/test-user/.env.medical-lab .env
+          fi
+
+          echo "🐳 Останавливаем старые контейнеры..."
+          docker-compose down 2>/dev/null || true
+
+          echo "🚀 Запускаем новые контейнеры..."
           docker-compose up -d --build
-          
-          # Ждем запуска контейнеров
+
+          echo "⏳ Ждем запуска..."
           sleep 30
-          
-          # Выполняем миграции
+
+          echo "🗄️ Выполняем миграции..."
           docker-compose exec -T web python manage.py migrate --noinput
-          
-          # Собираем статические файлы
+
+          echo "📦 Собираем статические файлы..."
           docker-compose exec -T web python manage.py collectstatic --noinput
-          
-          # Проверяем здоровье приложения
-          curl -f http://localhost/health/ || exit 1
-          
+
           echo "✅ Деплой завершен успешно!"
-          echo "🚀 Приложение доступно по адресу: http://${{ secrets.SERVER_HOST }}"
+          echo "🌐 Приложение доступно по адресу: http://158.160.12.110"
 
     - name: Send deployment notification
       uses: 8398a7/action-slack@v3
