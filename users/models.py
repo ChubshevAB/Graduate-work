@@ -8,78 +8,50 @@ class User(AbstractUser):
     """
     Кастомная модель пользователя (пациента)
     """
+
     # Делаем email уникальным и используем его для авторизации
-    email = models.EmailField(
-        unique=True,
-        verbose_name='Email'
-    )
+    email = models.EmailField(unique=True, verbose_name="Email")
 
     # Добавляем поле отчества
-    middle_name = models.CharField(
-        max_length=100,
-        blank=True,
-        verbose_name='Отчество'
-    )
+    middle_name = models.CharField(max_length=100, blank=True, verbose_name="Отчество")
 
     phone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name='Телефон'
+        max_length=20, blank=True, null=True, verbose_name="Телефон"
     )
 
-    birth_date = models.DateField(
-        null=True,
-        blank=True,
-        verbose_name='Дата рождения'
-    )
+    birth_date = models.DateField(null=True, blank=True, verbose_name="Дата рождения")
 
     GENDER_CHOICES = [
-        ('M', 'Мужской'),
-        ('F', 'Женский'),
+        ("M", "Мужской"),
+        ("F", "Женский"),
     ]
 
     gender = models.CharField(
-        max_length=1,
-        choices=GENDER_CHOICES,
-        default='O',
-        verbose_name='Пол'
+        max_length=1, choices=GENDER_CHOICES, default="O", verbose_name="Пол"
     )
 
-    address = models.TextField(
-        blank=True,
-        verbose_name='Адрес'
-    )
+    address = models.TextField(blank=True, verbose_name="Адрес")
 
-    medical_history = models.TextField(
-        blank=True,
-        verbose_name='Медицинская история'
-    )
+    medical_history = models.TextField(blank=True, verbose_name="Медицинская история")
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата создания'
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name='Дата обновления'
-    )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     # Убираем username, используем email вместо него
     username = None
 
     # Указываем, что email будет использоваться как поле для авторизации
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']  # Добавляем обязательные поля
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name"]  # Добавляем обязательные поля
 
     # Используем кастомный менеджер
     objects = CustomUserManager()
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ['-created_at']
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.get_full_name()} ({self.email})"
@@ -89,15 +61,15 @@ class User(AbstractUser):
         names = [self.last_name, self.first_name]
         if self.middle_name:
             names.append(self.middle_name)
-        return ' '.join(names)
+        return " ".join(names)
 
     @property
     def is_administrator(self):
-        return self.groups.filter(name='administrators').exists() or self.is_superuser
+        return self.groups.filter(name="administrators").exists() or self.is_superuser
 
     @property
     def is_moderator(self):
-        return self.groups.filter(name='moderators').exists()
+        return self.groups.filter(name="moderators").exists()
 
     @property
     def is_regular_user(self):
@@ -134,8 +106,7 @@ class User(AbstractUser):
             if not (self.is_administrator or self.is_moderator):
                 # Если это не админ и не модератор, обновляем права
                 User.objects.filter(id=self.id).update(
-                    is_staff=False,
-                    is_superuser=False
+                    is_staff=False, is_superuser=False
                 )
                 # Обновляем объект в памяти
                 self.is_staff = False

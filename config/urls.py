@@ -4,16 +4,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
+    path("admin/", admin.site.urls),
     # Подключи URLs из приложения medical_lab
-    path('', include('medical_lab.urls')),
-
+    path("", include("medical_lab.urls")),
     # Подключи URLs из приложения users (если создал)
-    path('users/', include('users.urls')),
-
+    path("users/", include("users.urls")),
     # URLs для REST Framework аутентификации
-    path('api-auth/', include('rest_framework.urls')),
+    path("api-auth/", include("rest_framework.urls")),
 ]
 
 # Добавь обработку статических файлов в режиме разработки

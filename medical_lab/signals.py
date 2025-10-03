@@ -17,7 +17,7 @@ def handle_analysis_status_change(sender, instance, **kwargs):
         old_instance = Analysis.objects.get(pk=instance.pk)
 
         # Проверяем изменение статуса на 'completed'
-        if old_instance.status != 'completed' and instance.status == 'completed':
+        if old_instance.status != "completed" and instance.status == "completed":
             logger.info(f"Статус анализа {instance.id} изменен на 'completed'")
 
             # Устанавливаем дату выполнения

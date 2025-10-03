@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
@@ -13,23 +13,24 @@ from .forms import PatientRegistrationForm
 
 
 class CustomLoginView(LoginView):
-    template_name = 'users/login.html'
+    template_name = "users/login.html"
 
     # Используем email вместо username для аутентификации
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields['username'].label = 'Email'
-        form.fields['username'].widget.attrs.update({
-            'class': 'form-control',
-            'placeholder': 'Введите ваш email'
-        })
+        form.fields["username"].label = "Email"
+        form.fields["username"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "Введите ваш email"}
+        )
         return form
 
     def get_success_url(self):
-        return reverse_lazy('medical_lab:home')
+        return reverse_lazy("medical_lab:home")
 
     def form_valid(self, form):
-        messages.success(self.request, f'Добро пожаловать, {form.get_user().get_full_name()}!')
+        messages.success(
+            self.request, f"Добро пожаловать, {form.get_user().get_full_name()}!"
+        )
         return super().form_valid(form)
 
 
@@ -52,7 +53,7 @@ class IsRegularUser(permissions.BasePermission):
 class IsAdministratorOrModerator(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and (
-                request.user.is_administrator or request.user.is_moderator
+            request.user.is_administrator or request.user.is_moderator
         )
 
 
@@ -60,10 +61,11 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet для управления пользователями
     """
+
     queryset = User.objects.all()
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == "create":
             return UserCreateSerializer
         return UserSerializer
 
@@ -71,9 +73,9 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Только администраторы могут управлять пользователями
         """
-        if self.action in ['list', 'retrieve']:
+        if self.action in ["list", "retrieve"]:
             permission_classes = [IsAdministratorOrModerator]
-        elif self.action in ['create', 'update', 'partial_update', 'destroy']:
+        elif self.action in ["create", "update", "partial_update", "destroy"]:
             permission_classes = [IsAdministrator]
         else:
             permission_classes = [IsAdministrator]
@@ -94,35 +96,36 @@ class UserViewSet(viewsets.ModelViewSet):
 
         if user.is_moderator:
             return User.objects.filter(
-                Q(groups__name='moderators') | Q(groups__name='users')
+                Q(groups__name="moderators") | Q(groups__name="users")
             ).distinct()
 
         return User.objects.none()
 
-    @action(detail=False, methods=['get'], permission_classes=[IsAdministrator])
+    @action(detail=False, methods=["get"], permission_classes=[IsAdministrator])
     def stats(self, request):
         """
         Статистика по пользователям
         GET /api/users/stats/
         """
-        from django.contrib.auth.models import Group
 
         total_users = User.objects.count()
-        admins_count = User.objects.filter(groups__name='administrators').count()
-        moderators_count = User.objects.filter(groups__name='moderators').count()
-        users_count = User.objects.filter(groups__name='users').count()
+        admins_count = User.objects.filter(groups__name="administrators").count()
+        moderators_count = User.objects.filter(groups__name="moderators").count()
+        users_count = User.objects.filter(groups__name="users").count()
 
         stats = {
-            'total_users': total_users,
-            'by_group': {
-                'administrators': admins_count,
-                'moderators': moderators_count,
-                'users': users_count,
-            }
+            "total_users": total_users,
+            "by_group": {
+                "administrators": admins_count,
+                "moderators": moderators_count,
+                "users": users_count,
+            },
         }
         return Response(stats)
 
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    @action(
+        detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated]
+    )
     def profile(self, request):
         """
         Получить профиль текущего пользователя
@@ -136,42 +139,44 @@ def register(request):
     """
     View для регистрации новых пациентов (пользователей)
     """
-    if request.method == 'POST':
+    if request.method == "POST":
         form = PatientRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             # Автоматически входим после регистрации
             login(request, user)
-            messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {user.get_full_name()}!')
-            return redirect('medical_lab:home')
+            messages.success(
+                request,
+                f"Регистрация прошла успешно! Добро пожаловать, {user.get_full_name()}!",
+            )
+            return redirect("medical_lab:home")
         else:
             for field, errors in form.errors.items():
                 for error in errors:
-                    messages.error(request, f'{field}: {error}')
+                    messages.error(request, f"{field}: {error}")
     else:
         form = PatientRegistrationForm()
 
-    context = {
-        'form': form,
-        'page_title': 'Регистрация пациента'
-    }
-    return render(request, 'users/register.html', context)
+    context = {"form": form, "page_title": "Регистрация пациента"}
+    return render(request, "users/register.html", context)
 
 
 def custom_login(request):
     """
     Кастомная view для входа по email
     """
-    if request.method == 'POST':
-        email = request.POST.get('username')  # Django использует 'username' для поля логина
-        password = request.POST.get('password')
+    if request.method == "POST":
+        email = request.POST.get(
+            "username"
+        )  # Django использует 'username' для поля логина
+        password = request.POST.get("password")
         user = authenticate(request, email=email, password=password)
 
         if user is not None:
             login(request, user)
-            messages.success(request, f'Добро пожаловать, {user.get_full_name()}!')
-            return redirect('medical_lab:home')
+            messages.success(request, f"Добро пожаловать, {user.get_full_name()}!")
+            return redirect("medical_lab:home")
         else:
-            messages.error(request, 'Неверный email или пароль.')
+            messages.error(request, "Неверный email или пароль.")
 
-    return render(request, 'users/login.html')
+    return render(request, "users/login.html")
