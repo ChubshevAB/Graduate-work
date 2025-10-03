@@ -86,44 +86,32 @@ jobs:
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          timeout: 60s
-          script: |
-            set -e
-            echo "🚀 Starting deployment..."
-            cd /opt/medical-lab-app
-
-            # Останавливаем текущие контейнеры
-            docker compose down
-
-            # Pull последних изменений
-            git pull origin master
-
-            # Создаем/обновляем .env файл
-            cat > .env << EOL
-            SECRET_KEY=${{ secrets.SECRET_KEY }}
-            DEBUG=False
-            ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }}
-            DB_NAME=medical_lab_db
-            DB_USER=medical_lab_user
-            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB_HOST=db
-            DB_PORT=5432
-            EOL
-
-            # Перезапускаем контейнеры
-            docker compose up -d --build
-
-            # Ждем готовности базы данных
-            sleep 15
-
-            # Выполняем миграции
-            docker compose exec -T web python manage.py migrate --noinput
-
-            # Собираем статические файлы
-            docker compose exec -T web python manage.py collectstatic --noinput
-
-            echo "✅ Deployment completed successfully!"
+            host: ${{ secrets.SERVER_HOST }}
+            username: ${{ secrets.SERVER_USERNAME }}
+            key: ${{ secrets.SERVER_SSH_KEY }}
+            port: 22
+            timeout: 60s
+            script: |
+              set -e
+              echo "🚀 Starting deployment..."
+              cd /opt/medical-lab-app
+              
+              docker compose down
+              git pull origin main
+              
+              cat > .env << EOL
+              SECRET_KEY=${{ secrets.SECRET_KEY }}
+              DEBUG=False
+              ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }}
+              DB_NAME=medical_lab_db
+              DB_USER=medical_lab_user
+              DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+              DB_HOST=db
+              DB_PORT=5432
+              EOL
+              
+              docker compose up -d --build
+              sleep 15
+              docker compose exec -T web python manage.py migrate --noinput
+              docker compose exec -T web python manage.py collectstatic --noinput
+              echo "✅ Deployment completed successfully!"
