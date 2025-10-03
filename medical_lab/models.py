@@ -1,7 +1,15 @@
+from venv import logger
+
+from django.core.mail import send_mail
 from django.db import models
 from django.conf import settings
 from datetime import date
 from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -123,6 +131,10 @@ class Patient(models.Model):
         if self.birth_date and self.birth_date > date.today():
             raise ValueError("Дата рождения не может быть в будущем")
         super().save(*args, **kwargs)
+
+    def completed_analyses_count(self):
+        """Количество завершенных анализов пациента"""
+        return self.analyses.filter(status='completed').count()
 
 
 class AnalysisType(models.Model):
@@ -266,6 +278,26 @@ class Analysis(models.Model):
             from django.utils import timezone
             self.completion_date = timezone.now()
         super().save(*args, **kwargs)
+
+    def send_completion_email(self):
+        """Отправляет email пациенту о готовности анализа"""
+        try:
+            # Проверяем, что у пациента есть email
+            if not self.patient or not self.patient.email:
+                return
+
+            subject = f'Готовность анализа #{self.id}'
+            message = 'Ваши анализы готовы, обратитесь в клинику за результатом'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [self.patient.email]
+
+            send_mail(subject, message, from_email, recipient_list)
+
+            # Логируем успешную отправку
+            logger.info(f"Email отправлен пациенту {self.patient.email} для анализа {self.id}")
+
+        except Exception as e:
+            logger.error(f"Ошибка отправки email: {e}")
 
 
 class Report(models.Model):

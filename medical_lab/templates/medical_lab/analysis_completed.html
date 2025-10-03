@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #3498db; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f9f9f9; padding: 20px; }
+        .footer { background: #eee; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 10px 10px; }
+        .analysis-info { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #3498db; border-radius: 4px; }
+        .button { display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Медицинская лаборатория</h1>
+        </div>
+
+        <div class="content">
+            <h2>Уважаемый(ая) {{ patient.get_full_name }}!</h2>
+
+            <p>Информируем Вас, что ваш лабораторный анализ готов.</p>
+
+            <div class="analysis-info">
+                <p><strong>Номер анализа:</strong> #{{ analysis.id }}</p>
+                <p><strong>Дата сдачи:</strong> {{ analysis_date }}</p>
+                <p><strong>Тип анализа:</strong> {{ analysis.analysis_type.name }}</p>
+                <p><strong>Статус:</strong> Завершен</p>
+                {% if analysis.completion_date %}
+                <p><strong>Дата выполнения:</strong> {{ analysis.completion_date|date:"d.m.Y H:i" }}</p>
+                {% endif %}
+            </div>
+
+            <p><strong>Вы можете получить результаты анализа:</strong></p>
+            <ul>
+                <li>В личном кабинете на нашем сайте</li>
+                <li>Обратившись в регистратуру нашей лаборатории</li>
+                <li>По телефону: +7 (XXX) XXX-XX-XX</li>
+            </ul>
+
+            <p>При себе необходимо иметь документ, удостоверяющий личность.</p>
+
+            <a href="#" class="button">Посмотреть результаты</a>
+        </div>
+
+        <div class="footer">
+            <p><strong>С уважением,<br>Медицинская лаборатория</strong></p>
+            <p>Телефон: +7 (XXX) XXX-XX-XX<br>Адрес: [ваш адрес]</p>
+            <p><em>Это письмо сформировано автоматически, пожалуйста, не отвечайте на него.</em></p>
+        </div>
+    </div>
+</body>
+</html>
