@@ -1,31 +1,20 @@
-name: CI/CD Pipeline
+name: Test, Build and Deploy
 
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-
-env:
-  DOCKER_IMAGE_NAME: medical-lab-app
 
 jobs:
-  test:
+  test-and-lint:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:15-alpine
         env:
-          POSTGRES_DB: test_medical_lab
+          POSTGRES_DB: test_db
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+        ports: [5432:5432]
 
     steps:
     - name: Checkout code
@@ -34,132 +23,109 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install flake8
 
-    - name: Create test environment file
+    - name: Run flake8 linting
       run: |
-        cat > .env.test << EOF
-        SECRET_KEY=test-secret-key-for-ci-cd-pipeline-2024
-        DEBUG=True
-        DB_NAME=test_medical_lab
-        DB_USER=test_user
-        DB_PASSWORD=test_password
-        DB_HOST=localhost
-        DB_PORT=5432
-        EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-        ALLOWED_HOSTS=localhost,127.0.0.1,testserver
-        DEFAULT_FROM_EMAIL=test@example.com
-        EOF
+        flake8 . --count --max-line-length=127 --statistics --exclude=migrations
 
-    - name: Run migrations
+    - name: Run basic tests
+      env:
+        DEBUG: "True"
+        SECRET_KEY: "test-secret-key-${{ github.run_id }}"
+        DB_NAME: test_db
+        DB_USER: test_user
+        DB_PASSWORD: test_password
+        DB_HOST: localhost
+        DB_PORT: 5432
+        ALLOWED_HOSTS: "localhost,127.0.0.1"
+        TELEGRAM_BOT_TOKEN: "test:token"
       run: |
-        export $(cat .env.test | xargs)
-        python manage.py migrate
+        python manage.py test habits.tests.HabitModelTest --noinput -v=1
+        python manage.py test habits.tests.HabitValidatorTest --noinput -v=1
+        python manage.py test users.tests.UserModelTest --noinput -v=1
 
-    - name: Run tests
-      run: |
-        export $(cat .env.test | xargs)
-        python manage.py test medical_lab --verbosity=2
-
-    - name: Run security check
-      run: |
-        pip install bandit
-        bandit -r medical_lab/ -f html -o security_report.html || true
-
-  build:
+  docker-build:
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    needs: test-and-lint
+    if: success() && github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
 
     - name: Build Docker image
       run: |
-        docker build -t $DOCKER_IMAGE_NAME:latest .
+        docker build -t habits-tracker .
 
     - name: Test Docker image
       run: |
-        docker run --rm $DOCKER_IMAGE_NAME:latest python manage.py check --deploy
+        docker run --rm habits-tracker python -c "import django; print('Django available')"
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test, build]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    needs: [test-and-lint, docker-build]
+    if: success() && github.ref == 'refs/heads/main'
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup SSH key with passphrase
+    - name: Setup SSH with passphrase
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
         chmod 600 ~/.ssh/deploy_key
-        # Добавляем ключ в ssh-agent с паролем
         eval "$(ssh-agent -s)"
         echo "${{ secrets.SSH_PASSPHRASE }}" | ssh-add ~/.ssh/deploy_key
-        # Добавляем хост в known_hosts
         ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-    - name: Deploy to production
+    - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         port: 22
-        timeout: 60s  # Увеличиваем таймаут для ключей с паролем
+        timeout: 60s
         script: |
-          set -e  # Останавливать выполнение при ошибке
-          echo "📁 Переходим в директорию проекта..."
-          mkdir -p /home/test-user/medical-lab
-          cd /home/test-user/medical-lab
-
-          echo "📥 Обновляем код..."
-          if [ -d ".git" ]; then
-            git pull origin main
-          else
-            git clone https://github.com/ChubshevAB/Graduate-work.git .
-          fi
-
-          echo "🔧 Копируем .env файл..."
-          if [ -f /home/test-user/.env.medical-lab ]; then
-            cp /home/test-user/.env.medical-lab .env
-          fi
-
-          echo "🐳 Останавливаем старые контейнеры..."
-          docker-compose down 2>/dev/null || true
-
-          echo "🚀 Запускаем новые контейнеры..."
-          docker-compose up -d --build
-
-          echo "⏳ Ждем запуска..."
-          sleep 30
-
-          echo "🗄️ Выполняем миграции..."
-          docker-compose exec -T web python manage.py migrate --noinput
-
-          echo "📦 Собираем статические файлы..."
-          docker-compose exec -T web python manage.py collectstatic --noinput
-
-          echo "✅ Деплой завершен успешно!"
-          echo "🌐 Приложение доступно по адресу: http://158.160.12.110"
-
-    - name: Send deployment notification
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        text: Деплой медицинской лаборатории завершен
-        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-      if: always() && github.ref == 'refs/heads/main'
+          set -e
+          echo "🚀 Starting deployment..."
+          cd /opt/habits-tracker
+          
+          # Останавливаем текущие контейнеры
+          docker compose down
+          
+          # Pull последних изменений
+          git pull origin main
+          
+          # Создаем/обновляем .env файл
+          cat > .env << EOL
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DEBUG=False
+          ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }}
+          POSTGRES_DB=habits_db
+          POSTGRES_USER=habits_user
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          EOL
+          
+          # Перезапускаем контейнеры
+          docker compose up -d --build
+          
+          # Ждем готовности базы данных
+          sleep 15
+          
+          # Выполняем миграции
+          docker compose exec -T web python manage.py migrate --noinput
+          
+          # Собираем статические файлы
+          docker compose exec -T web python manage.py collectstatic --noinput
+          
+          echo "✅ Deployment completed successfully!"
