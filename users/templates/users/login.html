@@ -1,0 +1,54 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Вход - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Вход в систему{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Вход для пациентов</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Email *</label>
+                        <input type="email" name="username" class="form-control" id="username"
+                               placeholder="Введите ваш email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль *</label>
+                        <input type="password" name="password" class="form-control" id="password"
+                               placeholder="Введите ваш пароль" required>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <small class="text-muted">
+                    Нет аккаунта? <a href="{% url 'users:register' %}" class="text-decoration-none">Зарегистрируйтесь</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Редактирование анализа - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Редактирование анализа{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Редактирование анализа: {{ analysis.analysis_type.name }}</h5>
+                <a href="{% url 'medical_lab:analysis_detail' analysis.id %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.patient.id_for_label }}" class="form-label">
+                                {{ form.patient.label }}
+                            </label>
+                            {{ form.patient }}
+                            {% if form.patient.errors %}
+                            <div class="text-danger small">{{ form.patient.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.analysis_type.id_for_label }}" class="form-label">
+                                {{ form.analysis_type.label }}
+                            </label>
+                            {{ form.analysis_type }}
+                            {% if form.analysis_type.errors %}
+                            <div class="text-danger small">{{ form.analysis_type.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.collection_date.id_for_label }}" class="form-label">
+                                {{ form.collection_date.label }}
+                            </label>
+                            {{ form.collection_date }}
+                            {% if form.collection_date.errors %}
+                            <div class="text-danger small">{{ form.collection_date.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Текущий статус</label>
+                            <div class="form-control-plaintext">
+                                <span class="badge
+                                    {% if analysis.status == 'completed' %}bg-success
+                                    {% elif analysis.status == 'in_progress' %}bg-warning
+                                    {% elif analysis.status == 'cancelled' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ analysis.get_status_display }}
+                                </span>
+                            </div>
+                            <small class="form-text text-muted">
+                                Для изменения статуса используйте
+                                <a href="{% url 'medical_lab:add_analysis_result' analysis.id %}" class="text-decoration-none">
+                                    форму добавления результатов
+                                </a>
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            {{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small">{{ form.notes.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Дополнительные примечания или особые указания</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'medical_lab:analysis_detail' analysis.id %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Отмена
+                            </a>
+                            {% if not analysis.result and user.is_moderator %}
+                            <a href="{% url 'medical_lab:add_analysis_result' analysis.id %}" class="btn btn-outline-success ms-2">
+                                <i class="bi bi-clipboard-data me-2"></i>Добавить результаты
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-2"></i>Сохранить изменения
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Информация об анализе -->
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Информация об анализе</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>ID анализа:</strong></td>
+                                <td>{{ analysis.id }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Дата создания:</strong></td>
+                                <td>{{ analysis.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Последнее обновление:</strong></td>
+                                <td>{{ analysis.updated_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>Пациент:</strong></td>
+                                <td>
+                                    <a href="{% url 'medical_lab:patient_detail' analysis.patient.id %}" class="text-decoration-none">
+                                        {{ analysis.patient.get_full_name }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Тип анализа:</strong></td>
+                                <td>{{ analysis.analysis_type.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Результат:</strong></td>
+                                <td>
+                                    {% if analysis.result %}
+                                    <span class="badge bg-success">Добавлен</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Ожидается</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                {% if analysis.notes %}
+                <div class="mt-3">
+                    <strong>Текущие примечания:</strong>
+                    <div class="bg-light p-3 rounded mt-2 small">
+                        {{ analysis.notes|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Информация о выбранном типе анализа -->
+        <div class="card mt-4 shadow-sm" id="analysis-info">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Информация о типе анализа</h6>
+            </div>
+            <div class="card-body">
+                <div id="analysis-details">
+                    <p class="text-muted">Выберите тип анализа для просмотра информации</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript для динамического отображения информации о анализе -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const analysisTypeSelect = document.getElementById('{{ form.analysis_type.id_for_label }}');
+    const analysisInfoCard = document.getElementById('analysis-info');
+    const analysisDetails = document.getElementById('analysis-details');
+
+    // Данные о типах анализов
+    const analysisTypesInfo = {
+        {% for analysis_type in form.analysis_type.field.queryset %}
+        '{{ analysis_type.id }}': {
+            'name': '{{ analysis_type.name }}',
+            'description': '{{ analysis_type.description|default:"Описание отсутствует"|escapejs }}',
+            'price': '{{ analysis_type.price }}',
+            'preparation': '{{ analysis_type.preparation_instructions|default:"Особые указания отсутствуют"|escapejs }}',
+            'turnaround': '{{ analysis_type.turnaround_time }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    };
+
+    function updateAnalysisInfo() {
+        const selectedId = analysisTypeSelect.value;
+
+        if (selectedId && analysisTypesInfo[selectedId]) {
+            const info = analysisTypesInfo[selectedId];
+            analysisDetails.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>${info.name}</h6>
+                        <p class="small text-muted">${info.description}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>Стоимость:</strong></td>
+                                <td>${info.price} руб.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Срок выполнения:</strong></td>
+                                <td>${info.turnaround} дн.</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <strong>Подготовка:</strong>
+                    <p class="small">${info.preparation}</p>
+                </div>
+            `;
+            analysisInfoCard.style.display = 'block';
+        } else {
+            analysisInfoCard.style.display = 'none';
+        }
+    }
+
+    // Обработчик изменения выбора типа анализа
+    analysisTypeSelect.addEventListener('change', updateAnalysisInfo);
+
+    // Инициализация при загрузке
+    updateAnalysisInfo();
+});
+</script>
+
+<style>
+.form-control:focus, .form-select:focus {
+    border-color: var(--medical-accent);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.table-sm td {
+    padding: 0.25rem 0.5rem;
+}
+
+.form-control-plaintext {
+    min-height: 38px;
+    padding: 0.375rem 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+}
+</style>
+{% endblock %}

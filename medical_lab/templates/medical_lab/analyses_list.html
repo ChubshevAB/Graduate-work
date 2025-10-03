@@ -1,0 +1,191 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Список анализов - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Список анализов{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Все анализы</h5>
+        <a href="{% url 'medical_lab:create_analysis' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Новый анализ
+        </a>
+    </div>
+    <div class="card-body">
+        {% if analyses %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Пациент</th>
+                        <th>Тип анализа</th>
+                        <th>Дата сдачи</th>
+                        <th>Статус</th>
+                        <th>Результат</th>
+                        <th>Лаборант</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analysis in analyses %}
+                    <tr>
+                        <td>{{ analysis.id }}</td>
+                        <td>
+                            <strong>{{ analysis.patient.last_name }} {{ analysis.patient.first_name }}</strong>
+                        </td>
+                        <td>{{ analysis.analysis_type.name }}</td>
+                        <td>{{ analysis.collection_date|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            <span class="badge
+                                {% if analysis.status == 'completed' %}bg-success
+                                {% elif analysis.status == 'in_progress' %}bg-warning
+                                {% elif analysis.status == 'cancelled' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ analysis.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if analysis.result %}
+                            <span class="badge bg-info">Есть результат</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Нет результата</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ analysis.lab_technician.username|default:"-" }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'medical_lab:analysis_detail' analysis.id %}"
+                                   class="btn btn-outline-info" title="Просмотр">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'medical_lab:edit_analysis' analysis.id %}"
+                                   class="btn btn-outline-primary" title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if not analysis.result %}
+                                <a href="{% url 'medical_lab:add_analysis_result' analysis.id %}"
+                                   class="btn btn-outline-success" title="Добавить результат">
+                                    <i class="bi bi-clipboard-data"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Пагинация -->
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-clipboard-data display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">Анализы не найдены</h4>
+            <p class="text-muted">У вас еще нет зарегистрированных анализов.</p>
+            <a href="{% url 'medical_lab:create_analysis' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle me-2"></i>Добавить первый анализ
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Фильтры и статистика -->
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Фильтры анализов</h6>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <select name="status" class="form-select">
+                            <option value="">Все статусы</option>
+                            <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>В ожидании</option>
+                            <option value="in_progress" {% if request.GET.status == 'in_progress' %}selected{% endif %}>В процессе</option>
+                            <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Завершено</option>
+                            <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Отменено</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="analysis_type" class="form-select">
+                            <option value="">Все типы анализов</option>
+                            {% for type in analysis_types %}
+                            <option value="{{ type.id }}" {% if request.GET.analysis_type == type.id|stringformat:"i" %}selected{% endif %}>
+                                {{ type.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="date" name="collection_date" class="form-control"
+                               value="{{ request.GET.collection_date }}">
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-filter me-2"></i>Применить фильтры
+                        </button>
+                        <a href="{% url 'medical_lab:analyses_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Сбросить
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Статистика</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ total_analyses }}</h4>
+                        <small class="text-muted">Всего анализов</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ completed_analyses }}</h4>
+                        <small class="text-muted">Завершено</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

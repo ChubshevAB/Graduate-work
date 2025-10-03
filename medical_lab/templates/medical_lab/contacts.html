@@ -1,0 +1,274 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Контакты - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Контакты{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Контактная информация -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-telephone me-2 text-primary"></i>Контактная информация</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-geo-alt text-primary me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Адрес</h5>
+                                <p class="mb-1">г. Москва, ул. Медицинская, д. 15</p>
+                                <small class="text-muted">метро "Медицинская", 5 минут пешком</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-clock text-success me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Часы работы</h5>
+                                <p class="mb-1">Пн-Пт: 7:00 - 20:00</p>
+                                <p class="mb-1">Сб: 8:00 - 18:00</p>
+                                <p class="mb-0">Вс: 9:00 - 16:00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-telephone-fill text-info me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Телефоны</h5>
+                                <p class="mb-1">
+                                    <a href="tel:+74951234567" class="text-decoration-none">+7 (495) 123-45-67</a>
+                                </p>
+                                <p class="mb-0">
+                                    <a href="tel:+78001234567" class="text-decoration-none">8 (800) 123-45-67</a>
+                                    <small class="text-muted"> - бесплатно по России</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-envelope text-warning me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Email</h5>
+                                <p class="mb-1">
+                                    <a href="mailto:info@medlab.ru" class="text-decoration-none">info@medlab.ru</a>
+                                </p>
+                                <p class="mb-0">
+                                    <a href="mailto:results@medlab.ru" class="text-decoration-none">results@medlab.ru</a>
+                                    <small class="text-muted"> - для вопросов по результатам</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Карта -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-map me-2 text-primary"></i>Мы на карте</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px; border-radius: 0 0 15px 15px;">
+                    <div class="text-center">
+                        <i class="bi bi-map display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">Интерактивная карта</h4>
+                        <p class="text-muted">Здесь будет отображаться карта с нашим местоположением</p>
+                        <button class="btn btn-primary" onclick="alert('Карта подключится после настройки API')">
+                            <i class="bi bi-geo-alt me-2"></i>Построить маршрут
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Быстрая связь -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-chat-dots me-2 text-primary"></i>Обратная связь</h5>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Ваше имя</label>
+                        <input type="text" class="form-control" id="name" placeholder="Введите ваше имя">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="example@mail.ru">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="phone" placeholder="+7 (XXX) XXX-XX-XX">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Сообщение</label>
+                        <textarea class="form-control" id="message" rows="4" placeholder="Ваш вопрос или сообщение..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" onclick="alert('Форма будет работать после настройки бэкенда')">
+                        <i class="bi bi-send me-2"></i>Отправить сообщение
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Дополнительные контакты -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>Дополнительная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6><i class="bi bi-credit-card me-2 text-success"></i>Оплата</h6>
+                    <p class="small text-muted mb-0">Принимаем наличные, банковские карты, онлайн-оплату</p>
+                </div>
+                <div class="mb-3">
+                    <h6><i class="bi bi-car-front me-2 text-info"></i>Парковка</h6>
+                    <p class="small text-muted mb-0">Бесплатная парковка для клиентов на 2 часа</p>
+                </div>
+                <div class="mb-3">
+                    <h6><i class="bi bi-wheelchair me-2 text-warning"></i>Доступность</h6>
+                    <p class="small text-muted mb-0">Здание оборудовано для маломобильных граждан</p>
+                </div>
+                <div>
+                    <h6><i class="bi bi-shield-check me-2 text-danger"></i>Безопасность</h6>
+                    <p class="small text-muted mb-0">Соблюдаем все меры безопасности и стерильности</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экстренные контакты -->
+        <div class="card shadow-sm border-warning">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Экстренные случаи</h5>
+            </div>
+            <div class="card-body">
+                <p class="small mb-3">При экстренных ситуациях обращайтесь:</p>
+                <div class="d-grid gap-2">
+                    <a href="tel:103" class="btn btn-outline-danger">
+                        <i class="bi bi-telephone me-2"></i>Скорая помощь: 103
+                    </a>
+                    <a href="tel:112" class="btn btn-outline-dark">
+                        <i class="bi bi-telephone me-2"></i>Единый номер: 112
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FAQ -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-question-circle me-2 text-primary"></i>Часто задаваемые вопросы</h4>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                Нужна ли предварительная запись?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Да, мы рекомендуем записываться заранее через сайт или по телефону. Это поможет избежать очередей и сэкономить ваше время.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Как подготовиться к сдаче анализов?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Большинство анализов крови сдаются натощак. За 8-12 часов до исследования не принимайте пищу, можно пить воду. Конкретные рекомендации зависят от типа анализа.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Сколько времени делаются анализы?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Сроки выполнения анализов варьируются от 1 до 5 рабочих дней в зависимости от сложности исследования. Срочные анализы (CITO) выполняются за 2-4 часа.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Можно ли получить результаты онлайн?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Да, после регистрации в нашей системе вы сможете получать результаты анализов в электронном виде на email или в личном кабинете.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.accordion-button {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--medical-primary);
+    color: white;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #f39c12, #e67e22) !important;
+}
+
+a.text-decoration-none:hover {
+    text-decoration: underline !important;
+}
+
+.form-control {
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    border-color: var(--medical-accent);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Результат анализа {{ analysis.analysis_type.name }} - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Результат анализа: {{ analysis.analysis_type.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Добавление результатов анализа</h5>
+                <a href="{% url 'medical_lab:analysis_detail' analysis.id %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Информация об анализе -->
+                <div class="alert alert-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Пациент:</strong> {{ analysis.patient.get_full_name }}<br>
+                            <strong>Тип анализа:</strong> {{ analysis.analysis_type.name }}<br>
+                            <strong>Дата забора:</strong>
+                            {% if analysis.collection_date %}
+                                {{ analysis.collection_date|date:"d.m.Y H:i" }}
+                            {% else %}
+                                Не указана
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Текущий статус:</strong>
+                            <span class="badge
+                                {% if analysis.status == 'completed' %}bg-success
+                                {% elif analysis.status == 'in_progress' %}bg-warning
+                                {% elif analysis.status == 'cancelled' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ analysis.get_status_display }}
+                            </span><br>
+                            <strong>Лаборант:</strong> {{ user.username }}
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.result.id_for_label }}" class="form-label">
+                            {{ form.result.label }}
+                        </label>
+                        {{ form.result }}
+                        {% if form.result.errors %}
+                        <div class="text-danger small">{{ form.result.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Подробное описание результатов анализа и заключение</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.result_values.id_for_label }}" class="form-label">
+                            {{ form.result_values.label }}
+                        </label>
+                        {{ form.result_values }}
+                        {% if form.result_values.errors %}
+                        <div class="text-danger small">{{ form.result_values.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">
+                            Введите значения в JSON формате. Пример:
+                            <code>{"гемоглобин": "140 г/л", "лейкоциты": "6.5 × 10⁹/л", "тромбоциты": "250 × 10⁹/л"}</code>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.normal_range.id_for_label }}" class="form-label">
+                            {{ form.normal_range.label }}
+                        </label>
+                        {{ form.normal_range }}
+                        {% if form.normal_range.errors %}
+                        <div class="text-danger small">{{ form.normal_range.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Нормальные референсные значения для данного анализа</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            {{ form.notes.label }}
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small">{{ form.notes.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Комментарии и примечания лаборанта</div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Внимание!</strong> После сохранения результатов статус анализа автоматически изменится на "Выполнен".
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'medical_lab:analysis_detail' analysis.id %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Отмена
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-clipboard-check me-2"></i>Сохранить результаты
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Шаблоны для разных типов анализов -->
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Шаблоны результатов</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Общий анализ крови</h6>
+                        <pre class="bg-light p-3 small rounded"><code>{
+  "гемоглобин": "140 г/л",
+  "эритроциты": "4.5 × 10¹²/л",
+  "лейкоциты": "6.5 × 10⁹/л",
+  "тромбоциты": "250 × 10⁹/л",
+  "гематокрит": "42%",
+  "СОЭ": "8 мм/ч"
+}</code></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Биохимический анализ</h6>
+                        <pre class="bg-light p-3 small rounded"><code>{
+  "глюкоза": "5.2 ммоль/л",
+  "холестерин": "4.8 ммоль/л",
+  "АЛТ": "25 Ед/л",
+  "АСТ": "22 Ед/л",
+  "креатинин": "88 мкмоль/л",
+  "мочевина": "5.8 ммоль/л"
+}</code></pre>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillTemplate('blood')">
+                        Заполнить шаблон ОАК
+                    </button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillTemplate('biochemistry')">
+                        Заполнить шаблон биохимии
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript для шаблонов -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Установка текущей даты и времени
+    const now = new Date();
+    const dateTimeString = now.toISOString().slice(0, 16);
+});
+
+function fillTemplate(templateType) {
+    const resultField = document.getElementById('{{ form.result.id_for_label }}');
+    const valuesField = document.getElementById('{{ form.result_values.id_for_label }}');
+    const normalRangeField = document.getElementById('{{ form.normal_range.id_for_label }}');
+
+    if (templateType === 'blood') {
+        valuesField.value = `{
+  "гемоглобин": "140 г/л",
+  "эритроциты": "4.5 × 10¹²/л",
+  "лейкоциты": "6.5 × 10⁹/л",
+  "тромбоциты": "250 × 10⁹/л",
+  "гематокрит": "42%",
+  "СОЭ": "8 мм/ч"
+}`;
+
+        resultField.value = `Гематологические показатели в пределах референсных значений.
+Патологических изменений не выявлено.`;
+
+        normalRangeField.value = `Гемоглобин: 130-160 г/л (м), 120-140 г/л (ж)
+Эритроциты: 4.0-5.1 × 10¹²/л (м), 3.7-4.7 × 10¹²/л (ж)
+Лейкоциты: 4.0-9.0 × 10⁹/л
+Тромбоциты: 180-320 × 10⁹/л
+СОЭ: 2-15 мм/ч (м), 2-20 мм/ч (ж)`;
+
+    } else if (templateType === 'biochemistry') {
+        valuesField.value = `{
+  "глюкоза": "5.2 ммоль/л",
+  "холестерин общий": "4.8 ммоль/л",
+  "холестерин ЛПВП": "1.4 ммоль/л",
+  "холестерин ЛПНП": "2.8 ммоль/л",
+  "АЛТ": "25 Ед/л",
+  "АСТ": "22 Ед/л",
+  "креатинин": "88 мкмоль/л",
+  "мочевина": "5.8 ммоль/л"
+}`;
+
+        resultField.value = `Биохимические показатели в пределах физиологической нормы.
+Нарушений углеводного и липидного обмена не выявлено.
+Функция печени и почек сохранена.`;
+
+        normalRangeField.value = `Глюкоза: 3.3-6.1 ммоль/л
+Холестерин общий: 3.2-5.6 ммоль/л
+Холестерин ЛПВП: >1.0 ммоль/л (м), >1.2 ммоль/л (ж)
+Холестерин ЛПНП: <3.0 ммоль/л
+АЛТ: до 41 Ед/л (м), до 31 Ед/л (ж)
+АСТ: до 37 Ед/л (м), до 31 Ед/л (ж)
+Креатинин: 62-106 мкмоль/л (м), 44-80 мкмоль/л (ж)
+Мочевина: 2.5-8.3 ммоль/л`;
+    }
+
+    // Показать уведомление
+    alert('Шаблон заполнен. Проверьте и отредактируйте данные перед сохранением.');
+}
+</script>
+
+<style>
+.form-control:focus, .form-select:focus {
+    border-color: var(--medical-accent);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+pre {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.form-text {
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

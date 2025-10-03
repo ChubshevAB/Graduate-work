@@ -1,0 +1,219 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Редактирование {{ patient.get_full_name }} - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Редактирование пациента{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Редактирование пациента: {{ patient.get_full_name }}</h5>
+                <a href="{% url 'medical_lab:patient_detail' patient.id %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                Фамилия *
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="text-danger small">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                Имя *
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="text-danger small">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.middle_name.id_for_label }}" class="form-label">
+                                Отчество
+                            </label>
+                            {{ form.middle_name }}
+                            {% if form.middle_name.errors %}
+                            <div class="text-danger small">{{ form.middle_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.birth_date.id_for_label }}" class="form-label">
+                                Дата рождения *
+                            </label>
+                            {{ form.birth_date }}
+                            {% if form.birth_date.errors %}
+                            <div class="text-danger small">{{ form.birth_date.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">
+                                Пол *
+                            </label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                            <div class="text-danger small">{{ form.gender.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                Телефон
+                            </label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div class="text-danger small">{{ form.phone.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                Email
+                            </label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.address.id_for_label }}" class="form-label">
+                            Адрес
+                        </label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                            <div class="text-danger small">{{ form.address.errors }}</div>
+                            {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.medical_history.id_for_label }}" class="form-label">
+                            Медицинская история/примечания
+                        </label>
+                        {{ form.medical_history }}
+                        {% if form.medical_history.errors %}
+                        <div class="text-danger small">{{ form.medical_history.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Любая дополнительная медицинская информация о пациенте</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <a href="{% url 'medical_lab:patient_detail' patient.id %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Отмена
+                            </a>
+                            <a href="{% url 'medical_lab:create_analysis' %}?patient={{ patient.id }}" class="btn btn-outline-primary ms-2">
+                                <i class="bi bi-plus-circle me-2"></i>Добавить анализ
+                            </a>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-2"></i>Сохранить изменения
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Информация о пациенте -->
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Информация о пациенте</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>ID пациента:</strong></td>
+                                <td>{{ patient.id }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Дата создания:</strong></td>
+                                <td>{{ patient.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Последнее обновление:</strong></td>
+                                <td>{{ patient.updated_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>Создатель:</strong></td>
+                                <td>{{ patient.created_by.username }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Всего анализов:</strong></td>
+                                <td>
+                                    <span class="badge bg-primary">{{ patient.analyses.count }}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Завершено анализов:</strong></td>
+                                <td>
+                                    <span class="badge bg-success">{{ patient.analyses|length }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: var(--medical-accent);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .btn {
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .table-sm td {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}

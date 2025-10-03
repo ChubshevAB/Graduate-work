@@ -1,0 +1,276 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Медицинская лаборатория{% endblock %}</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        :root {
+            --medical-primary: #2c3e50;
+            --medical-secondary: #34495e;
+            --medical-accent: #3498db;
+            --medical-success: #27ae60;
+            --medical-danger: #e74c3c;
+            --text-light: #ecf0f1;
+            --hover-effect: rgba(255, 255, 255, 0.1);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapper {
+            display: flex;
+            flex: 1 0 auto;
+            min-height: 0;
+        }
+
+        .sidebar {
+            background: linear-gradient(to bottom, var(--medical-primary), var(--medical-secondary));
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+        }
+
+        .sidebar .card {
+            border: none;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar .card-header {
+            background-color: var(--medical-primary);
+            border-bottom: 1px solid var(--medical-accent);
+        }
+
+        .sidebar .card-body {
+            background-color: var(--medical-secondary);
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: var(--text-light);
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a:hover {
+            background-color: var(--hover-effect);
+            transform: translateX(5px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            background: linear-gradient(to right, var(--medical-primary), var(--medical-accent));
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .auth-btn {
+            color: var(--text-light);
+            background-color: transparent;
+            border: 1px solid var(--text-light);
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .auth-btn:hover {
+            background-color: var(--hover-effect);
+            color: white;
+        }
+
+        .medical-badge {
+            background-color: var(--medical-success);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            background-color: var(--medical-primary);
+            padding: 15px;
+            color: var(--text-light);
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+<div class="wrapper">
+    <div class="sidebar">
+        <div class="card h-100">
+            <div class="card-header border-light">
+                <h2 class="text-center mb-0">Медицинская лаборатория</h2>
+            </div>
+            <div class="card-body">
+                <nav class="nav flex-column">
+                    {% if user.is_authenticated %}
+                        {% if user.is_administrator or user.is_moderator %}
+                            <!-- Меню для администраторов и модераторов -->
+                            <a href="{% url 'medical_lab:patients_list' %}" class="nav-link">
+                                <i class="bi bi-people me-2"></i>Пациенты
+                            </a>
+                            <a href="{% url 'medical_lab:create_patient' %}" class="nav-link">
+                                <i class="bi bi-person-plus me-2"></i>Добавить пациента
+                            </a>
+                        {% else %}
+                            <!-- Меню для обычных пользователей (пациентов) -->
+                            <a href="{% url 'medical_lab:patients_list' %}" class="nav-link">
+                                <i class="bi bi-person me-2"></i>Моя карта
+                            </a>
+                        {% endif %}
+
+                        <a href="{% url 'medical_lab:analyses_list' %}" class="nav-link">
+                            <i class="bi bi-clipboard-data me-2"></i>Список анализов
+                        </a>
+                        <a href="{% url 'medical_lab:create_analysis' %}" class="nav-link">
+                            <i class="bi bi-plus-circle me-2"></i>Записаться на анализ
+                        </a>
+
+                        {% if user.is_administrator or user.is_moderator %}
+                            <a href="{% url 'medical_lab:reports' %}" class="nav-link">
+                                <i class="bi bi-graph-up me-2"></i>Отчеты
+                            </a>
+                        {% endif %}
+
+                        {% if user.is_staff %}
+                            <a href="/admin/" class="nav-link" target="_blank">
+                                <i class="bi bi-gear me-2"></i>Админ-панель
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <!-- Меню для гостей -->
+                        <a href="{% url 'medical_lab:home' %}" class="nav-link">
+                            <i class="bi bi-house me-2"></i>Главная
+                        </a>
+                        <a href="{% url 'medical_lab:about' %}" class="nav-link">
+                            <i class="bi bi-info-circle me-2"></i>О лаборатории
+                        </a>
+                        <a href="{% url 'medical_lab:services' %}" class="nav-link">
+                            <i class="bi bi-list-check me-2"></i>Услуги
+                        </a>
+                        <a href="{% url 'medical_lab:contacts' %}" class="nav-link">
+                            <i class="bi bi-telephone me-2"></i>Контакты
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+            <div class="card-footer">
+                <small>Медицинская лаборатория &copy; 2025</small>
+            </div>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="display-4 mb-0">
+                {% block page_title %}Медицинская лаборатория{% endblock %}
+            </h1>
+            <div class="auth-buttons">
+                {% if user.is_authenticated %}
+                <span class="auth-btn">
+                    <i class="bi bi-person me-2"></i>
+                    {% if user.first_name %}
+                        {{ user.first_name }}
+                        {% if user.last_name %}
+                            {{ user.last_name }}
+                        {% endif %}
+                    {% else %}
+                        {{ user.email }}
+                    {% endif %}
+                </span>
+                <a href="{% url 'users:logout' %}" class="auth-btn">
+                    <i class="bi bi-box-arrow-left me-2"></i>Выход
+                </a>
+                {% else %}
+                <a href="{% url 'users:register' %}" class="auth-btn">
+                    <i class="bi bi-person-plus me-2"></i>Регистрация
+                </a>
+                <a href="{% url 'users:login' %}" class="auth-btn">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Вход
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="container-fluid">
+            <!-- Блок для уведомлений -->
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Основной контент -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="{% static 'js/bootstrap.bundle.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Автоматическое скрытие alert через 5 секунд
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    });
+</script>
+</body>
+</html>

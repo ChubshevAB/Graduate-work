@@ -1,0 +1,208 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Отчеты - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Отчеты и статистика{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Карточки статистики -->
+    <div class="col-md-3 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h2 class="card-title">{{ total_analyses }}</h2>
+                <p class="card-text">Всего анализов</p>
+                <i class="bi bi-clipboard-data display-6"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h2 class="card-title">{{ completed_analyses }}</h2>
+                <p class="card-text">Завершено анализов</p>
+                <i class="bi bi-check-circle display-6"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h2 class="card-title">{{ in_progress_analyses }}</h2>
+                <p class="card-text">Анализов в работе</p>
+                <i class="bi bi-hourglass-split display-6"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h2 class="card-title">{{ total_patients }}</h2>
+                <p class="card-text">Всего пациентов</p>
+                <i class="bi bi-people display-6"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Фильтры -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Фильтры отчетов</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <!-- Период -->
+            <div class="col-md-3">
+                <label for="date_from" class="form-label">Период с</label>
+                <input type="date" class="form-control" id="date_from" name="date_from"
+                       value="{{ request.GET.date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="date_to" class="form-label">Период по</label>
+                <input type="date" class="form-control" id="date_to" name="date_to"
+                       value="{{ request.GET.date_to }}">
+            </div>
+
+            <!-- Тип анализа -->
+            <div class="col-md-3">
+                <label for="analysis_type" class="form-label">Тип анализа</label>
+                <select class="form-select" id="analysis_type" name="analysis_type">
+                    <option value="">Все типы</option>
+                    {% for type in analysis_types %}
+                        <option value="{{ type.id }}"
+                            {% if request.GET.analysis_type == type.id|stringformat:"i" %}selected{% endif %}>
+                            {{ type.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Пациент -->
+            <div class="col-md-3">
+                <label for="patient" class="form-label">Пациент</label>
+                <select class="form-select" id="patient" name="patient">
+                    <option value="">Все пациенты</option>
+                    {% for patient in patients %}
+                        <option value="{{ patient.id }}"
+                            {% if request.GET.patient == patient.id|stringformat:"i" %}selected{% endif %}>
+                            {{ patient.get_full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Кнопки -->
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-filter me-2"></i>Применить фильтры
+                    </button>
+                    <a href="{% url 'medical_lab:reports' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Сбросить
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Детальная статистика -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Детальная статистика</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Статистика по статусам -->
+            <div class="col-md-6">
+                <h6>Распределение по статусам</h6>
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Зарегистрированные
+                        <span class="badge bg-secondary rounded-pill">{{ registered_analyses }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        В работе
+                        <span class="badge bg-warning rounded-pill">{{ in_progress_analyses }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Завершено
+                        <span class="badge bg-success rounded-pill">{{ completed_analyses }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        Отменено
+                        <span class="badge bg-danger rounded-pill">{{ cancelled_analyses }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Статистика по типам анализов -->
+            <div class="col-md-6">
+                <h6>Анализы по типам</h6>
+                <div class="list-group">
+                    {% for type in analysis_types_stats %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ type.analysis_type__name }}
+                        <span class="badge bg-info rounded-pill">{{ type.count }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item text-muted text-center">
+                        Нет данных для отображения
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 10px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.list-group-item {
+    border: 1px solid #e3e6f0;
+    margin-bottom: 5px;
+    border-radius: 5px;
+}
+
+.badge {
+    font-size: 0.8em;
+    min-width: 50px;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+</style>
+
+<script>
+// Автоматическая установка дат по умолчанию (последние 30 дней)
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+
+    // Устанавливаем значения только если они не заданы в URL
+    if (!document.getElementById('date_from').value) {
+        document.getElementById('date_from').valueAsDate = thirtyDaysAgo;
+    }
+    if (!document.getElementById('date_to').value) {
+        document.getElementById('date_to').valueAsDate = today;
+    }
+});
+</script>
+{% endblock %}

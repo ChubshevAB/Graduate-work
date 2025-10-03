@@ -1,0 +1,182 @@
+{% extends 'medical_lab/base.html' %}
+
+{% block title %}Главная - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Добро пожаловать в медицинскую лабораторию{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h3 class="card-title text-primary">
+                    <i class="bi bi-heart-pulse me-2"></i>О нашей лаборатории
+                </h3>
+                <p class="card-text lead">
+                    Мы предоставляем полный спектр лабораторных исследований с использованием современного оборудования
+                    и соблюдением международных стандартов качества.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-speedometer2 me-2"></i>Быстрые результаты
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Большинство анализов готовы в течение 24 часов. Срочные анализы - за 2-3 часа.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Онлайн-запись</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Электронные результаты</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>SMS-уведомления</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-award me-2"></i>Высокая точность
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Современное оборудование и квалифицированный персонал гарантируют точность результатов.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Сертифицированное оборудование</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Опытные лаборанты</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Многоуровневый контроль</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not user.is_authenticated %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                <div>
+                    <h5 class="alert-heading mb-2">Для сотрудников лаборатории</h5>
+                    <p class="mb-0">
+                        <strong>Войдите в систему</strong> для доступа к полному функционалу управления пациентами и анализами.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-success">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-check-fill me-3 fs-4"></i>
+                <div>
+                    <h5 class="alert-heading mb-2">Добро пожаловать, {{ user.username }}!</h5>
+                    <p class="mb-0">
+                        Вы вошли в систему как
+                        {% if user.is_admin %}
+                            <span class="badge bg-danger">Администратор</span>
+                        {% elif user.is_moderator %}
+                            <span class="badge bg-warning text-dark">Модератор</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Гость</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Быстрый доступ для авторизованных пользователей -->
+<div class="row mt-4">
+    <div class="col-12">
+        <h4 class="mb-3">Быстрый доступ</h4>
+    </div>
+
+    {% if user.is_admin or user.is_moderator %}
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-people fs-1 text-primary mb-3"></i>
+                <h5 class="card-title">Пациенты</h5>
+                <p class="card-text">Управление базой пациентов</p>
+                <a href="{% url 'medical_lab:patients_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-clipboard-data fs-1 text-success mb-3"></i>
+                <h5 class="card-title">Анализы</h5>
+                <p class="card-text">Просмотр и управление анализами</p>
+                <a href="{% url 'medical_lab:analyses_list' %}" class="btn btn-success">Перейти</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-graph-up fs-1 text-info mb-3"></i>
+                <h5 class="card-title">Отчеты</h5>
+                <p class="card-text">Статистика и аналитика</p>
+                <a href="{% url 'medical_lab:reports' %}" class="btn btn-info">Перейти</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Контактная информация -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h4 class="card-title">
+                    <i class="bi bi-telephone me-2"></i>Контактная информация
+                </h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong><i class="bi bi-geo-alt me-2"></i>Адрес:</strong><br>
+                        г. Москва, ул. Медицинская, д. 1</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong><i class="bi bi-phone me-2"></i>Телефон:</strong><br>
+                        +7 (495) 123-45-67</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong><i class="bi bi-envelope me-2"></i>Email:</strong><br>
+                        info@medlab.ru</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p><strong><i class="bi bi-clock me-2"></i>Режим работы:</strong><br>
+                        Пн-Пт: 8:00 - 20:00<br>
+                        Сб-Вс: 9:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

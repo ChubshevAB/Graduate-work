@@ -1,0 +1,220 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}О лаборатории - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}О нашей лаборатории{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Основная информация -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-building me-2 text-primary"></i>О нашей лаборатории</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">Мы - современная медицинская лаборатория, предоставляющая полный спектр лабораторных исследований с 2010 года.</p>
+
+                <p>Наша лаборатория оснащена самым современным оборудованием ведущих мировых производителей, что позволяет нам гарантировать точность и достоверность результатов исследований.</p>
+
+                <h5 class="mt-4">Наши преимущества</h5>
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <div>
+                                <h6>Высокая точность</h6>
+                                <p class="text-muted small">Современное оборудование и квалифицированный персонал</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <div>
+                                <h6>Быстрые сроки</h6>
+                                <p class="text-muted small">Результаты большинства анализов в течение 24 часов</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <div>
+                                <h6>Доступные цены</h6>
+                                <p class="text-muted small">Конкурентные цены и система скидок</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <i class="bi bi-check-circle-fill text-success me-3 fs-5"></i>
+                            <div>
+                                <h6>Удобство</h6>
+                                <p class="text-muted small">Онлайн-запись и электронные результаты</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Наша команда -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-people me-2 text-primary"></i>Наша команда</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="text-center">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width: 100px; height: 100px;">
+                                <i class="bi bi-person-fill text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h5>Доктор Иванова А.П.</h5>
+                            <p class="text-muted">Главный врач-лаборант</p>
+                            <p class="small">Опыт работы: 15 лет. Специализация: клиническая лабораторная диагностика.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="text-center">
+                            <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                 style="width: 100px; height: 100px;">
+                                <i class="bi bi-person-fill text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h5>Петров С.М.</h5>
+                            <p class="text-muted">Ведущий лаборант</p>
+                            <p class="small">Опыт работы: 10 лет. Специализация: биохимические исследования.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Факты и цифры -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2 text-primary"></i>Мы в цифрах</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <div class="display-4 text-primary fw-bold">13+</div>
+                    <p class="text-muted">Лет успешной работы</p>
+                </div>
+
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Выполнено анализов</span>
+                    <span class="fw-bold text-primary">50,000+</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Довольных пациентов</span>
+                    <span class="fw-bold text-primary">15,000+</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Видов анализов</span>
+                    <span class="fw-bold text-primary">150+</span>
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                    <span>Точность результатов</span>
+                    <span class="fw-bold text-primary">99.8%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сертификаты -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-award me-2 text-primary"></i>Сертификаты</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-0">ISO 15189</h6>
+                        <small class="text-muted">Международный стандарт качества</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-check-circle-fill text-success me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-0">РОСЗДРАВНАДЗОР</h6>
+                        <small class="text-muted">Лицензия № ЛО-77-01-019876</small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-check-circle-fill text-success me-3 fs-4"></i>
+                    <div>
+                        <h6 class="mb-0">EQAS</h6>
+                        <small class="text-muted">Внешняя оценка качества</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Быстрые ссылки -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-link-45deg me-2 text-primary"></i>Полезные ссылки</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'medical_lab:services' %}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-list-check me-2"></i>Наши услуги
+                    </a>
+                    <a href="{% url 'medical_lab:contacts' %}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-telephone me-2"></i>Контакты
+                    </a>
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'users:register' %}" class="btn btn-outline-success text-start">
+                        <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+}
+
+.lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+.bg-primary, .bg-success {
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-accent)) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--medical-success), #2ecc71) !important;
+}
+
+.display-4 {
+    font-weight: 700;
+}
+
+.btn {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

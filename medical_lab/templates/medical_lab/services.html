@@ -1,0 +1,274 @@
+{% extends 'medical_lab/base.html' %}
+{% load static %}
+
+{% block title %}Услуги и анализы - Медицинская лаборатория{% endblock %}
+
+{% block page_title %}Наши услуги{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Введение -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center py-5">
+                <h2 class="display-5 mb-3">Полный спектр лабораторных исследований</h2>
+                <p class="lead text-muted">Мы предлагаем более 150 видов анализов с использованием современного оборудования</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Основные категории услуг -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0 service-card">
+            <div class="card-body text-center p-4">
+                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                     style="width: 80px; height: 80px;">
+                    <i class="bi bi-droplet text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="card-title">Анализы крови</h4>
+                <p class="card-text text-muted">Комплексные исследования крови для диагностики различных заболеваний</p>
+                <ul class="list-unstyled text-start mt-3">
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Общий анализ крови</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Биохимический анализ</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Гормональные исследования</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Коагулограмма</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Иммунологические тесты</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-4">
+                <span class="badge bg-primary fs-6">от 300 ₽</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0 service-card">
+            <div class="card-body text-center p-4">
+                <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                     style="width: 80px; height: 80px;">
+                    <i class="bi bi-activity text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="card-title">Анализы мочи</h4>
+                <p class="card-text text-muted">Исследования мочи для оценки функции почек и обмена веществ</p>
+                <ul class="list-unstyled text-start mt-3">
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Общий анализ мочи</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Анализ по Нечипоренко</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Биохимия мочи</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>Проба Зимницкого</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Суточный анализ мочи</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-4">
+                <span class="badge bg-success fs-6">от 250 ₽</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0 service-card">
+            <div class="card-body text-center p-4">
+                <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                     style="width: 80px; height: 80px;">
+                    <i class="bi bi-virus text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h4 class="card-title">Инфекции и ПЦР</h4>
+                <p class="card-text text-muted">Диагностика инфекционных заболеваний методом ПЦР и ИФА</p>
+                <ul class="list-unstyled text-start mt-3">
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>COVID-19 (ПЦР)</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>ВИЧ, гепатиты</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>TORCH-инфекции</li>
+                    <li class="mb-2"><i class="bi bi-check text-success me-2"></i>ИППП</li>
+                    <li><i class="bi bi-check text-success me-2"></i>Кишечные инфекции</li>
+                </ul>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center pb-4">
+                <span class="badge bg-warning fs-6">от 500 ₽</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Дополнительные услуги -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-plus-circle me-2 text-primary"></i>Дополнительные услуги</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-truck text-primary me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Выезд на дом</h5>
+                                <p class="text-muted mb-0">Забор анализов на дому в удобное для вас время</p>
+                                <small class="text-primary">+500 ₽ к стоимости анализов</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-speedometer2 text-success me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Срочные анализы</h5>
+                                <p class="text-muted mb-0">Результаты в течение 2-4 часов (CITO)</p>
+                                <small class="text-success">+50% к стоимости</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-envelope-check text-info me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Электронные результаты</h5>
+                                <p class="text-muted mb-0">Получите результаты на email или в личном кабинете</p>
+                                <small class="text-info">Бесплатно</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-telephone text-warning me-3 fs-4 mt-1"></i>
+                            <div>
+                                <h5>Консультация врача</h5>
+                                <p class="text-muted mb-0">Расшифровка результатов опытным специалистом</p>
+                                <small class="text-warning">1000 ₽</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Процесс работы -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="bi bi-gear me-2 text-primary"></i>Как мы работаем</h4>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="step-number bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 60px; height: 60px;">
+                            <span class="fs-4 fw-bold">1</span>
+                        </div>
+                        <h5>Запись</h5>
+                        <p class="text-muted small">Онлайн или по телефону</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="step-number bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 60px; height: 60px;">
+                            <span class="fs-4 fw-bold">2</span>
+                        </div>
+                        <h5>Забор</h5>
+                        <p class="text-muted small">Быстро и безболезненно</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="step-number bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 60px; height: 60px;">
+                            <span class="fs-4 fw-bold">3</span>
+                        </div>
+                        <h5>Анализ</h5>
+                        <p class="text-muted small">На современном оборудовании</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="step-number bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                             style="width: 60px; height: 60px;">
+                            <span class="fs-4 fw-bold">4</span>
+                        </div>
+                        <h5>Результат</h5>
+                        <p class="text-muted small">Электронно или на бумаге</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Призыв к действию -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white shadow-sm">
+            <div class="card-body text-center py-5">
+                <h3 class="mb-3">Готовы сдать анализы?</h3>
+                <p class="mb-4">Зарегистрируйтесь в нашей системе для удобной записи и получения результатов</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'medical_lab:create_analysis' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Записаться на анализ
+                    </a>
+                    {% else %}
+                    <a href="{% url 'users:register' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
+                    </a>
+                    <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.service-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.step-number {
+    transition: transform 0.3s ease;
+}
+
+.step-number:hover {
+    transform: scale(1.1);
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.bg-primary, .bg-success, .bg-warning, .bg-info {
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-accent)) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--medical-success), #2ecc71) !important;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #f39c12, #f1c40f) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #3498db, #2980b9) !important;
+}
+
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
