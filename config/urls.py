@@ -1,7 +1,12 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+
+
+def health_check(request):
+    return JsonResponse({"status": "healthy", "service": "medical_lab"})
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -11,6 +16,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     # URLs для REST Framework аутентификации
     path("api-auth/", include("rest_framework.urls")),
+    path("health/", health_check, name="health_check"),
 ]
 
 # Добавь обработку статических файлов в режиме разработки
