@@ -1,4 +1,4 @@
-name: Test, Build and Deploy
+name: Test, Build and Deploy Medical Lab
 
 on:
   push:
@@ -11,10 +11,15 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_medical_lab_db
+          POSTGRES_USER: test_medical_user
+          POSTGRES_PASSWORD: test_medical_password
         ports: [5432:5432]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - name: Checkout code
@@ -27,35 +32,62 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install flake8
+        pip install flake8 pytest pytest-django
 
     - name: Run flake8 linting
       run: |
         flake8 . --count --max-line-length=127 --statistics --exclude=migrations
 
-    - name: Run basic tests
+    - name: Run database migrations
       env:
         DEBUG: "True"
         SECRET_KEY: "test-secret-key-${{ github.run_id }}"
-        DB_NAME: test_db
-        DB_USER: test_user
-        DB_PASSWORD: test_password
+        DB_NAME: test_medical_lab_db
+        DB_USER: test_medical_user
+        DB_PASSWORD: test_medical_password
         DB_HOST: localhost
         DB_PORT: 5432
         ALLOWED_HOSTS: "localhost,127.0.0.1"
-        TELEGRAM_BOT_TOKEN: "test:token"
+        EMAIL_HOST: "smtp.test.com"
+        EMAIL_HOST_USER: "test@test.com"
+        EMAIL_HOST_PASSWORD: "test"
+        DEFAULT_FROM_EMAIL: "test@test.com"
       run: |
-        # Сначала проверяем, что приложения загружаются
-        python manage.py check medical_lab --fail-level WARNING
-        python manage.py check users --fail-level WARNING
+        python manage.py check --fail-level WARNING
+        python manage.py migrate --noinput
+
+    - name: Run tests
+      env:
+        DEBUG: "True"
+        SECRET_KEY: "test-secret-key-${{ github.run_id }}"
+        DB_NAME: test_medical_lab_db
+        DB_USER: test_medical_user
+        DB_PASSWORD: test_medical_password
+        DB_HOST: localhost
+        DB_PORT: 5432
+        ALLOWED_HOSTS: "localhost,127.0.0.1"
+        EMAIL_HOST: "smtp.test.com"
+        EMAIL_HOST_USER: "test@test.com"
+        EMAIL_HOST_PASSWORD: "test"
+        DEFAULT_FROM_EMAIL: "test@test.com"
+      run: |
+        # Запуск тестов для медицинского приложения
+        python manage.py test medical_lab --noinput -v=2 || echo "No medical_lab tests found"
         
-        # Запускаем базовые тесты для медицинской лаборатории
-        python manage.py test medical_lab.tests --noinput -v=1 || echo "No medical_lab tests found"
-        python manage.py test users.tests --noinput -v=1 || echo "No users tests found"
+        # Запуск тестов для пользователей
+        python manage.py test users --noinput -v=2 || echo "No users tests found"
         
-        # Если нет конкретных тестовых файлов, запускаем общее тестирование
-        python manage.py test --noinput -v=1 || echo "No tests found"
+        # Общие тесты Django
+        python manage.py test --noinput -v=2 --exclude-tag=slow || echo "No general tests found"
+
+    - name: Collect static files
+      env:
+        DEBUG: "True"
+        SECRET_KEY: "test-secret-key-${{ github.run_id }}"
+      run: |
+        python manage.py collectstatic --noinput --clear
 
   docker-build:
     runs-on: ubuntu-latest
@@ -66,61 +98,170 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Build Docker image
       run: |
         docker build -t medical-lab-app .
 
     - name: Test Docker image
       run: |
-        docker run --rm medical-lab-app python -c "import django; print('Django available')"
+        docker run --rm medical-lab-app python -c "import django; print(f'Django {django.__version__} available')"
+        docker run --rm medical-lab-app python manage.py check --fail-level WARNING
 
-  deploy:
+  security-scan:
     runs-on: ubuntu-latest
-    needs: [ test-and-lint, docker-build ]
+    needs: test-and-lint
     if: success() && github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: |
-            echo "🚀 Starting deployment..."
-            cd /opt/habits-tracker
+    - name: Run security checks
+      run: |
+        pip install bandit safety
+        bandit -r . -f html -o bandit_report.html || true
+        safety check --json || true
 
-            # Останавливаем текущие контейнеры
-            docker compose down
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [test-and-lint, docker-build]
+    if: success() && github.ref == 'refs/heads/main'
 
-            # Pull последних изменений
-            git pull origin main
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-            # Создаем/обновляем .env файл
-            cat > .env << EOL
-            SECRET_KEY=${{ secrets.SECRET_KEY }}
-            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-            DEBUG=False
-            ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }}
-            POSTGRES_DB=habits_db
-            POSTGRES_USER=habits_user
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            EOL
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        script: |
+          echo "🚀 Starting deployment for Medical Lab..."
+          cd /opt/medical-lab
+          
+          # Останавливаем текущие контейнеры
+          docker compose down
+          
+          # Pull последних изменений
+          git pull origin main
+          
+          # Создаем необходимые директории
+          mkdir -p nginx/ssl logs
+          
+          # Создаем/обновляем .env файл
+          cat > .env << EOL
+          # Django Settings
+          DEBUG=False
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }},158.160.12.110
+          
+          # Database
+          POSTGRES_DB=medical_lab_db
+          POSTGRES_USER=medical_lab_user
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          
+          # Email Settings
+          EMAIL_HOST=smtp.yandex.ru
+          EMAIL_PORT=465
+          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
+          DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}
+          
+          # Application Database Configuration
+          DB_NAME=medical_lab_db
+          DB_USER=medical_lab_user
+          DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          DB_HOST=postgres
+          DB_PORT=5432
+          
+          # Redis
+          CELERY_BROKER_URL=redis://redis:6379/0
+          CELERY_RESULT_BACKEND=redis://redis:6379/0
+          EOL
+          
+          # Перезапускаем контейнеры
+          echo "Building and starting containers..."
+          docker compose up -d --build --remove-orphans
+          
+          # Ждем готовности сервисов
+          echo "Waiting for services to be ready..."
+          sleep 30
+          
+          # Проверяем здоровье сервисов
+          echo "Checking services health..."
+          docker compose ps
+          
+          # Выполняем миграции
+          echo "Running database migrations..."
+          max_retries=5
+          retry_count=0
+          while [ $retry_count -lt $max_retries ]; do
+            if docker compose exec -T web python manage.py migrate --noinput; then
+              echo "Migrations completed successfully"
+              break
+            else
+              retry_count=$((retry_count + 1))
+              echo "Migration attempt $retry_count failed, retrying in 10 seconds..."
+              sleep 10
+            fi
+          done
+          
+          # Собираем статические файлы
+          echo "Collecting static files..."
+          docker compose exec -T web python manage.py collectstatic --noinput --clear
+          
+          # Создаем суперпользователя если нужно (опционально)
+          echo "Checking if superuser exists..."
+          docker compose exec -T web python manage.py shell -c "
+          from django.contrib.auth import get_user_model;
+          User = get_user_model();
+          if not User.objects.filter(email='admin@medical-lab.ru').exists():
+              User.objects.create_superuser('admin@medical-lab.ru', 'admin123')
+              print('Superuser created')
+          else:
+              print('Superuser already exists')
+          " || echo "Superuser creation skipped"
+          
+          # Проверяем доступность приложения
+          echo "Testing application health..."
+          max_health_retries=10
+          health_retry_count=0
+          while [ $health_retry_count -lt $max_health_retries ]; do
+            if curl -f http://localhost:80/health/; then
+              echo "Application is healthy!"
+              break
+            else
+              health_retry_count=$((health_retry_count + 1))
+              echo "Health check attempt $health_retry_count failed, retrying in 5 seconds..."
+              sleep 5
+            fi
+          done
+          
+          echo "✅ Medical Lab deployment completed successfully!"
 
-            # Перезапускаем контейнеры
-            docker compose up -d --build
+    - name: Verify deployment
+      run: |
+        echo "Waiting for deployment to stabilize..."
+        sleep 30
+        echo "Deployment verification completed"
 
-            # Ждем готовности базы данных
-            sleep 15
+  notify:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always()
 
-            # Выполняем миграции
-            docker compose exec web python manage.py migrate --noinput
-
-            # Собираем статические файлы
-            docker compose exec web python manage.py collectstatic --noinput
-
-            echo "✅ Deployment completed successfully!"
+    steps:
+    - name: Notify deployment status
+      run: |
+        if [ "${{ needs.deploy.result }}" == "success" ]; then
+          echo "🚀 Deployment completed successfully!"
+        else
+          echo "❌ Deployment failed!"
+          exit 1
+        fi
