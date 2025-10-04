@@ -158,7 +158,7 @@ jobs:
           # Django Settings
           DEBUG=False
           SECRET_KEY=${{ secrets.SECRET_KEY }}
-          ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }},158.160.12.110
+          ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.SERVER_HOST }},130.193.53.225
           
           # Database
           POSTGRES_DB=medical_lab_db
