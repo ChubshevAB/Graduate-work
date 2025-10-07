@@ -142,7 +142,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
           echo "🚀 Starting deployment for Medical Lab..."
-          cd /opt/medical-lab
+          cd /home/test-user/Graduate-work
           
           # Останавливаем текущие контейнеры
           docker compose down
