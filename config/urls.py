@@ -8,6 +8,7 @@ from django.conf.urls.static import static
 def health_check(request):
     return JsonResponse({"status": "healthy", "service": "medical_lab"})
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Подключи URLs из приложения medical_lab
